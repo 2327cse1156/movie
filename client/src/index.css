@@ -5,8 +5,8 @@
 
 /* ✅ Remove @theme, define colors in tailwind.config.js */
 @theme {
-  --color-primary: #00A3A3;
-  --color-primary-dull: #1A1A1A;
+  --color-primary: #800020;
+  --color-primary-dull: #4B3A30;
 }
 
 * {
