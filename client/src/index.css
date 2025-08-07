@@ -26,6 +26,15 @@
   background-color: #1A1A1A;
 }
 
+input ::-webkit-outer-spin-button,
+input ::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+
+::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
 body {
   color: white;
   background-color: #1A1A1A;
