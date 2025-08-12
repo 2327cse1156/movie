@@ -5,6 +5,7 @@ import connectDB from "./config/db.js";
 import { clerkMiddleware } from "@clerk/express";
 import { serve } from "inngest/express";
 import { functions, inngest } from "./inngest/index.js";
+import showRouter from "./routes/showRoutes.js"
 const app = express();
 
 const PORT = process.env.PORT || 5000;
@@ -20,6 +21,7 @@ app.use(
     functions,
   })
 );
+app.use("/api/show",showRouter)
 
 // api routes
 app.get("/", (req, res) => {
