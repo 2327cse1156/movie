@@ -6,6 +6,7 @@ import { clerkMiddleware } from "@clerk/express";
 import { serve } from "inngest/express";
 import { functions, inngest } from "./inngest/index.js";
 import showRouter from "./routes/showRoutes.js"
+import bookingRouter from "./routes/bookingRoutes.js";
 const app = express();
 
 const PORT = process.env.PORT || 5000;
@@ -22,7 +23,7 @@ app.use(
   })
 );
 app.use("/api/show",showRouter)
-
+app.use("/api/booking",bookingRouter)
 // api routes
 app.get("/", (req, res) => {
   res.send("Server is live");
