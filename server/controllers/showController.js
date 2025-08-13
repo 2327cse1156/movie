@@ -1,6 +1,7 @@
 import axios from "axios";
 import Movie from "../models/Movie.js";
 import Show from "../models/Show.js";
+
 export const getNowPlayingMovies = async (req, res) => {
   try {
     const { data } = await axios.get(
@@ -47,29 +48,70 @@ export const addShow = async (req, res) => {
         tagline: movieApiData.tagline || "",
         vote_average: movieApiData.vote_average,
         runtime: movieApiData.runtime,
-      }
+      };
 
       movie = await Movie.create(movieDetails);
     }
 
     const showsToCreate = [];
 
-    showsInput.forEach(show => {
-        const showDate = show.date;
-        show.time.forEach((time)=> {
-            const dateTimeSring = `${showDate}T${time}`;
-            showsToCreate.push({
-                movie:movieId,
-                showDateTime:new Date(dateTimeSring),
-                showPrice,
-                occupiedSeats: {}
-            })
-        })
+    showsInput.forEach((show) => {
+      const showDate = show.date;
+      show.time.forEach((time) => {
+        const dateTimeSring = `${showDate}T${time}`;
+        showsToCreate.push({
+          movie: movieId,
+          showDateTime: new Date(dateTimeSring),
+          showPrice,
+          occupiedSeats: {},
+        });
+      });
     });
-    if(showsToCreate.length > 0) {
-        await Show.insertMany(showsToCreate);
+    if (showsToCreate.length > 0) {
+      await Show.insertMany(showsToCreate);
     }
-    res.json({success:true, message:"Show Added Succesfully."})
+    res.json({ success: true, message: "Show Added Succesfully." });
+  } catch (error) {
+    console.log(error.message);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+export const getShows = async (req, res) => {
+  try {
+    const shows = await Show.find({ showDateTime: { $gte: new Date() } })
+      .populate("movie")
+      .sort({ showDateTime: 1 });
+
+    const uniqueShows = new Set(shows.map((show) => show.movie));
+
+    res.json({ success: true, shows: Array.from(uniqueShows) });
+  } catch (error) {
+    console.log(error.message);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+export const getShow = async (req, res) => {
+  try {
+    const { movieId } = req.params;
+
+    const shows = await Show.find({
+      movie: movieId,
+      showDateTime: { $gte: new Date() },
+    });
+
+    const movie = await Movie.findById(movieId);
+    const dateTime = {};
+    shows.forEach((show) => {
+      const date = show.showDateTime.toISOString().split("T")[0];
+      if (!dateTime[date]) {
+        dateTime[date] = [];
+      }
+      dateTime[date].push({ time: show.showDateTime, showId: show._id });
+    });
+
+    res.json({success:true,movie: dateTime})
   } catch (error) {
     console.log(error.message);
     res.json({ success: false, message: error.message });
