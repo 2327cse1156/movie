@@ -42,7 +42,7 @@ export const addShow = async (req, res) => {
         poster_path: movieApiData.poster_path,
         backdrop_path: movieApiData.backdrop_path,
         genres: movieApiData.genres,
-        casts: movieApiData.casts,
+        casts: movieCreditsData.cast,
         release_date: movieApiData.release_date,
         original_language: movieApiData.original_language,
         tagline: movieApiData.tagline || "",
@@ -57,11 +57,12 @@ export const addShow = async (req, res) => {
 
     showsInput.forEach((show) => {
       const showDate = show.date;
-      show.time.forEach((time) => {
-        const dateTimeSring = `${showDate}T${time}`;
+      show.time.forEach(time => {
+        const dateTimeString = `${showDate}T${time}`;
+        const showDateTime = new Date(dateTimeString);
         showsToCreate.push({
           movie: movieId,
-          showDateTime: new Date(dateTimeSring),
+          showDateTime,
           showPrice,
           occupiedSeats: {},
         });
@@ -111,7 +112,7 @@ export const getShow = async (req, res) => {
       dateTime[date].push({ time: show.showDateTime, showId: show._id });
     });
 
-    res.json({success:true,movie: dateTime})
+    res.json({ success: true, movie, dateTime });
   } catch (error) {
     console.log(error.message);
     res.json({ success: false, message: error.message });
