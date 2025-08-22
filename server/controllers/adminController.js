@@ -39,9 +39,14 @@ export const getAllShows = async (req, res) => {
     const shows = await Show.find({ showDateTime: { $gte: new Date() } })
       .populate("movie")
       .sort({ showDateTime: 1 });
+      res.status(200).json({
+        success:true,
+        count:shows.length,
+        shows,
+      })
   } catch (error) {
     console.error(error);
-    res.json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 

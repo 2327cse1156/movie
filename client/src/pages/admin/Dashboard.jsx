@@ -6,11 +6,12 @@ import {
   UsersIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { dummyDashboardData } from "../../assets/assets";
+import { useAppContext } from "../../context/AppContext";
 import Loading from "../../components/Loading";
 import Title from "../../components/admin/Title";
-import BlurCircle from "../../components/BLurCircle";
+import BlurCircle from "../../components/BlurCircle";
 import { dateFormat } from "../../lib/dateFormat";
+import toast from "react-hot-toast";
 
 function Dashboard() {
   const currency = import.meta.env.VITE_CURRENCY;
@@ -22,7 +23,7 @@ function Dashboard() {
     totalUser: 0,
   });
   const [loading, setLoading] = useState(true);
-
+  const { axios, getToken, user, image_base_url } = useAppContext();
   const dashboardCards = [
     {
       title: "Total Bookings",
@@ -47,13 +48,24 @@ function Dashboard() {
   ];
 
   const fetchDashboardData = async () => {
-    setDashboardData(dummyDashboardData);
-    setLoading(false);
+    try {
+      const { data } = await axios.get("/api/admin/dashboard", {
+        headers: { Authorization: `Bearer ${await getToken()}` },
+      });
+      if (data.success) {
+        setDashboardData(data.dashboardData);
+        setLoading(false);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error("Error fetching dashboard data:", error);
+    }
   };
 
   useEffect(() => {
-    fetchDashboardData();
-  }, []);
+    if (user) fetchDashboardData();
+  }, [user]);
 
   return !loading ? (
     <div className="relative px-4 md:px-8 py-6 max-w-7xl mx-auto">
@@ -97,7 +109,7 @@ function Dashboard() {
               className="rounded-xl shadow-md dark:shadow-lg overflow-hidden bg-gray-100 dark:bg-[#1e1e2f] hover:shadow-xl transition-all"
             >
               <img
-                src={show.movie.poster_path}
+                src={image_base_url+show.movie.poster_path}
                 className="w-full h-80 object-cover object-top"
                 alt={show.movie.title}
               />

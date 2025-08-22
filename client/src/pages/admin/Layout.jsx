@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import AdminNavbar from "../../components/admin/adminNavbar";
 import AdminSidebar from "../../components/admin/adminSidebar";
+import { useAppContext } from "../../context/AppContext";
+import Loading from "../../components/Loading";
 
 function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -13,8 +15,12 @@ function Layout() {
   useEffect(() => {
     setSidebarOpen(false);
   }, [location]);
+  const {isAdmin,fetchIsAdmin} = useAppContext();
+  useEffect(()=>{
+    fetchIsAdmin()
+  },[])
 
-  return (
+  return isAdmin ? (
     <>
       <AdminNavbar onToggleSidebar={toggleSidebar} />
 
@@ -44,7 +50,7 @@ function Layout() {
         </div>
       </div>
     </>
-  );
+  ):(<Loading></Loading>)
 }
 
 export default Layout;
