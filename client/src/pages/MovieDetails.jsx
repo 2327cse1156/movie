@@ -1,28 +1,75 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { dummyShowsData, dummyDateTimeData } from "../assets/assets";
 import { Heart, PlayCircleIcon, StarIcon } from "lucide-react";
 import BlurCircle from "../components/BlurCircle";
 import timeFormat from "../lib/timeFormat";
 import DateSelect from "../components/DateSelect";
 import MovieCard from "../components/MovieCard";
 import Loading from "../components/Loading";
+import { useAppContext } from "../context/AppContext";
+import toast from "react-hot-toast";
 
 const MovieDetails = () => {
   const { id } = useParams();
   const [show, setShow] = useState(null);
+  const {
+    shows,
+    axios,
+    getToken,
+    user,
+    fetchFavoriteMovies,
+    favoriteMovies,
+    image_base_url,
+  } = useAppContext();
 
-  const getShow = async () => {
-    const show = dummyShowsData.find((show) => show._id === id);
-    setShow({
-      movie: show,
-      dateTime: dummyDateTimeData,
-    });
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  const handleFavorite = async () => {
+    try {
+      if (!user) {
+        return toast.error("Please Login to proceed");
+      }
+
+      const { data } = await axios.post(
+        "/api/user/update-favorite",
+        { movieId: id },
+        { headers: { Authorization: `Bearer ${await getToken()}` } }
+      );
+
+      if (data.success) {
+        await fetchFavoriteMovies();
+        setIsFavorite((prev) => !prev); // Toggle instantly
+        toast.success(data.message);
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
   };
 
+  const getShow = async () => {
+    try {
+      const { data } = await axios.get(`/api/show/${id}`);
+      if (data.success) {
+        setShow({ movie: data.movie, dateTime: data.dateTime });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // Initial data fetch
   useEffect(() => {
     getShow();
   }, [id]);
+
+  // Update favorite state whenever favorites or id change
+  useEffect(() => {
+    if (favoriteMovies && favoriteMovies.some((movie) => movie._id === id)) {
+      setIsFavorite(true);
+    } else {
+      setIsFavorite(false);
+    }
+  }, [favoriteMovies, id]);
 
   const navigate = useNavigate();
 
@@ -31,7 +78,7 @@ const MovieDetails = () => {
       <div className="flex flex-col md:flex-row gap-10 relative z-10">
         {/* Poster */}
         <img
-          src={show.movie.poster_path}
+          src={image_base_url + show.movie.poster_path}
           alt=""
           className="rounded-lg shadow-lg w-full md:w-1/3 object-cover"
         />
@@ -81,8 +128,16 @@ const MovieDetails = () => {
             >
               Buy Tickets
             </a>
-            <button className="p-2 border border-gray-500 rounded-full hover:bg-gray-800 transition">
-              <Heart size={20} />
+            <button
+              onClick={handleFavorite}
+              className="p-2 border border-gray-500 rounded-full hover:bg-gray-800 transition"
+            >
+              <Heart
+                size={20}
+                className={`w-5 h-5 ${
+                  isFavorite ? "fill-red-600 text-red-600" : ""
+                }`}
+              />
             </button>
           </div>
         </div>
@@ -97,7 +152,7 @@ const MovieDetails = () => {
             className="bg-gray-800/40 rounded-lg p-3 text-center hover:bg-gray-700/70 hover:scale-105 transition-all duration-300"
           >
             <img
-              src={cast.profile_path}
+              src={image_base_url + cast.profile_path}
               alt=""
               className="w-24 h-24 mx-auto rounded-full object-cover mb-3"
             />
@@ -107,7 +162,7 @@ const MovieDetails = () => {
       </div>
 
       {/* Date Selection */}
-      <div className="mt-16">
+      <div className="mt-16" id="dateSelect">
         <DateSelect dateTime={show.dateTime} id={id} />
       </div>
 
@@ -115,7 +170,7 @@ const MovieDetails = () => {
       <div className="mt-20">
         <p className="text-2xl font-bold mb-6">🍿 You May Also Like</p>
         <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {dummyShowsData.slice(0, 4).map((movie, index) => (
+          {shows.slice(0, 4).map((movie, index) => (
             <MovieCard key={index} movie={movie} />
           ))}
         </div>

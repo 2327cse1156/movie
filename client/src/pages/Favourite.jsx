@@ -1,18 +1,34 @@
-import { useState } from "react";
-import { dummyShowsData } from "../assets/assets";
+import { useEffect, useState } from "react";
 import BlurCircle from "../components/BlurCircle";
 import MovieCard from "../components/MovieCard";
 import { Heart } from "lucide-react";
+import { useAppContext } from "../context/AppContext";
+import Loading from "../components/Loading";
 
 const Favourite = () => {
-  const [favourites, setFavourites] = useState(dummyShowsData);
+  const { favoriteMovies, fetchFavoriteMovies } = useAppContext();
+  const [loading, setLoading] = useState(true);
+  const [favourites, setFavourites] = useState([]);
+
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true);
+      await fetchFavoriteMovies();
+      setLoading(false);
+    };
+    load();
+  }, []);
+
+  useEffect(() => {
+    setFavourites(favoriteMovies);
+  }, [favoriteMovies]);
 
   // Toggle favourite state
   const toggleFavourite = (movieId) => {
-    setFavourites((prev) =>
-      prev.filter((movie) => movie._id !== movieId)
-    );
+    setFavourites((prev) => prev.filter((movie) => movie._id !== movieId));
   };
+
+  if (loading) return <Loading />;
 
   return (
     <section className="relative min-h-screen bg-gradient-to-b from-gray-900 via-gray-950 to-black text-white overflow-hidden">
@@ -49,7 +65,6 @@ const Favourite = () => {
             {favourites.map((movie) => (
               <div key={movie._id} className="relative group">
                 <MovieCard movie={movie} />
-
                 {/* Heart Icon Overlay */}
                 <button
                   onClick={() => toggleFavourite(movie._id)}

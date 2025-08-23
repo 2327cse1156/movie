@@ -1,9 +1,10 @@
-import { dummyShowsData } from "../assets/assets";
 import BlurCircle from "../components/BlurCircle";
 import MovieCard from "../components/MovieCard";
+import { useAppContext } from "../context/AppContext";
 
 const Movies = () => {
-  return (
+  const {shows} = useAppContext()
+  return shows.length > 0 ?(
     <section className="relative min-h-screen bg-gradient-to-b from-gray-900 via-gray-950 to-black text-white overflow-hidden">
       {/* Blur Background */}
       <BlurCircle top="-50px" left="-50px" size="300px" color="rgba(255,0,0,0.3)" blur="blur(80px)" animate />
@@ -16,9 +17,9 @@ const Movies = () => {
         </h1>
 
         {/* Movies Grid */}
-        {dummyShowsData.length > 0 ? (
+        {shows.length > 0 ? (
           <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-            {dummyShowsData.map((movie) => (
+            {shows.map((movie) => (
               <MovieCard key={movie._id} movie={movie} />
             ))}
           </div>
@@ -27,7 +28,9 @@ const Movies = () => {
         )}
       </div>
     </section>
-  );
+  ): (<div className="flex flex-col items-center justify-center h-screen">
+    <h1 className="text-3xl font-bold text-center ">No Movies Available</h1>
+  </div>)
 };
 
 export default Movies;
