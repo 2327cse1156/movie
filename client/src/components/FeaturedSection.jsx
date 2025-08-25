@@ -9,7 +9,7 @@ const FeaturedSection = () => {
   const { shows } = useAppContext();
   const navigate = useNavigate();
 
-  console.log("shows from context:", shows);
+  
 
   // Extract movies correctly
   const movies = useMemo(() => {

@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { assets, dummyBookingData } from "../assets/assets";
-import BlurCircle from "../components/BLurCircle";
+import BlurCircle from "../components/BlurCircle";
 import Loading from "../components/Loading";
 import timeFormat from "../lib/timeFormat";
 import { dateFormat } from "../lib/dateFormat";
-import { ClockIcon, CalendarIcon, TicketIcon } from "lucide-react";
 
+import { useAppContext } from "../context/AppContext";
 const MyBookings = () => {
   const currency = import.meta.env.VITE_CURRENCY;
+  const { axios, getToken, user, image_base_url } = useAppContext();
 
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,7 +15,16 @@ const MyBookings = () => {
   const [showOnlyUnpaid, setShowOnlyUnpaid] = useState(false);
 
   const getMyBookings = async () => {
-    setBookings(dummyBookingData);
+    try {
+      const { data } = await axios.get("/api/user/bookings", {
+        headers: { Authorization: `Bearer ${await getToken()}` },
+      });
+      if (data.success) {
+        setBookings(data.bookings);
+      }
+    } catch (error) {
+      console.log(error);
+    }
     setLoading(false);
   };
 
@@ -36,8 +45,8 @@ const MyBookings = () => {
     );
 
   useEffect(() => {
-    getMyBookings();
-  }, []);
+    if (user) getMyBookings();
+  }, [user]);
 
   return !loading ? (
     <div className="pt-24 min-h-screen px-4 sm:px-10 bg-black text-white">
@@ -74,7 +83,7 @@ const MyBookings = () => {
             className="bg-primary border border-white/10 rounded-2xl p-6 shadow-md mb-6 flex flex-col md:flex-row items-center gap-6"
           >
             <img
-              src={item.show.movie.poster_path}
+              src={image_base_url + item.show.movie.poster_path}
               className="w-36 h-52 object-cover rounded-lg shadow-md"
             />
             <div className="flex-1 w-full">
