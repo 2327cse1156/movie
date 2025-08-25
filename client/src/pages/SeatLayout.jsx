@@ -12,11 +12,11 @@ function SeatLayout() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { axios } = useAppContext();
-  const[selectedTime,setSelectedTime]=useState(null)
+  const [selectedTime, setSelectedTime] = useState(null);
   const [movie, setMovie] = useState(null);
   const [show, setShow] = useState(null);
   const [selectedSeats, setSelectedSeats] = useState([]);
-  const [occupiedSeats,setOccupiedSeats] = useState([])
+  const [occupiedSeats, setOccupiedSeats] = useState([]);
   // Fetch show
   useEffect(() => {
     if (!id) return;
@@ -61,28 +61,25 @@ function SeatLayout() {
       setSelectedSeats((s) => [...s, seat]);
     }
   };
-  const getOccupiedSeats = async()=>{
+  const getOccupiedSeats = async () => {
     try {
-      const {data} = await axios.get(`/api/booking/seats/${selectedTime.showId}`)
-      if(data.success)
-      {
-        setSelectedSeats(data.occupiedSeats)
-      }
-      else
-      {
-        toast.error(data.message)
+      const { data } = await axios.get(
+        `/api/booking/seats/${selectedTime.showId}`
+      );
+      if (data.success) {
+        setSelectedSeats(data.occupiedSeats);
+      } else {
+        toast.error(data.message);
       }
     } catch (error) {
       console.log(error);
-      
     }
-  }
-  useEffect(()=>{
-    if(selectedTime)
-    {
-      getOccupiedSeats()
+  };
+  useEffect(() => {
+    if (selectedTime) {
+      getOccupiedSeats();
     }
-  },[selectedTime])
+  }, [selectedTime]);
 
   const handleCheckout = () => {
     if (!selectedSeats.length) return toast.error("Select at least 1 seat");
@@ -99,7 +96,7 @@ function SeatLayout() {
     {
       label: "Front",
       rows: ["A", "B"],
-      seatsPerRow: 5, 
+      seatsPerRow: 5,
       color: "bg-blue-900/20 border-blue-500/50",
       price: show.showPrice,
     },
@@ -196,7 +193,6 @@ function SeatLayout() {
                     const taken = takenSeats.includes(seat);
                     const selected = selectedSeats.includes(seat);
 
-
                     return (
                       <div key={seat}>
                         {/* Add aisle in middle */}
@@ -213,7 +209,7 @@ function SeatLayout() {
                               : selected
                               ? "bg-primary text-white border-primary scale-105 shadow-lg"
                               : "bg-white text-black hover:bg-primary hover:text-white hover:scale-105"
-                          }${occupiedSeats.includes(seat)&&"opacity-50"}`}
+                          }${occupiedSeats.includes(seat) && "opacity-50"}`}
                         >
                           {seat}
                         </button>
